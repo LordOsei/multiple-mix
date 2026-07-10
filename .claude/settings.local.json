@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:fonts.googleapis.com)",
+      "WebFetch(domain:registry.npmjs.org)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(curl -s \"https://api.github.com/repos/LordOsei/multiple-mix/actions/runs?per_page=1\")",
+      "Bash(python3 -c ' *)"
+    ]
+  }
+}
