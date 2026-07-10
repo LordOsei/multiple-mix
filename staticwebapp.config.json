@@ -1,0 +1,17 @@
+{
+  "routes": [
+    { "route": "/shop", "rewrite": "/shop.html" },
+    { "route": "/product", "rewrite": "/product.html" },
+    { "route": "/about", "rewrite": "/about.html" },
+    { "route": "/blog", "rewrite": "/blog.html" },
+    { "route": "/contact", "rewrite": "/contact.html" },
+    { "route": "/cart", "rewrite": "/cart.html" }
+  ],
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/css/*", "/js/*", "/data/*", "*.{ico,png,svg,jpg,jpeg,gif,webp}"]
+  },
+  "globalHeaders": {
+    "Cache-Control": "public, max-age=3600"
+  }
+}

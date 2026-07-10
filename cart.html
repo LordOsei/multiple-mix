@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cart — Multiple Mix</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav__inner">
+      <a class="nav__logo" href="index.html">Multiple<span>Mix</span></a>
+      <button class="nav__toggle" aria-label="Toggle menu">&#9776;</button>
+      <ul class="nav__links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <a class="nav__cart" href="cart.html" aria-label="Shopping cart">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <span class="cart-badge hidden" id="cartBadge">0</span>
+      </a>
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <p class="page-header__eyebrow">Multiple Mix</p>
+    <h1>Your Cart</h1>
+  </div>
+
+  <div class="cart-layout" id="cartLayout">
+    <!-- Rendered by JS -->
+  </div>
+
+  <footer class="footer">
+    <div class="footer__inner">
+      <div>
+        <p class="footer__logo">Multiple<span>Mix</span></p>
+        <p class="footer__tagline">Bridging Ghana and the world — one order at a time.</p>
+      </div>
+      <div class="footer__links-col">
+        <strong>Shop</strong>
+        <ul>
+          <li><a href="shop.html?filter=clothing">Clothing</a></li>
+          <li><a href="shop.html?filter=food">Food &amp; Snacks</a></li>
+          <li><a href="shop.html">All Products</a></li>
+        </ul>
+      </div>
+      <div class="footer__links-col">
+        <strong>Company</strong>
+        <ul>
+          <li><a href="about.html">About Us</a></li>
+          <li><a href="blog.html">Blog</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer__links-col">
+        <strong>Help</strong>
+        <ul>
+          <li><a href="#">Shipping Policy</a></li>
+          <li><a href="#">Returns</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">&copy; 2026 Multiple Mix. All rights reserved.</div>
+  </footer>
+
+  <script src="js/cart.js"></script>
+  <script src="js/nav.js"></script>
+  <script>
+    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    function renderCart() {
+      const cart = getCart();
+      const layout = document.getElementById('cartLayout');
+
+      if (!cart.length) {
+        layout.innerHTML = `
+          <div style="grid-column:1/-1">
+            <div class="cart-empty">
+              <p>Your cart is empty.</p>
+              <a href="shop.html" class="btn btn--primary">Continue Shopping</a>
+            </div>
+          </div>`;
+        return;
+      }
+
+      const subtotal = getCartTotal();
+      const shipping = subtotal >= 50 ? 0 : 7.99;
+      const total = subtotal + shipping;
+
+      const itemsHtml = cart.map(item => `
+        <div class="cart-item" data-key="${esc(item.key)}">
+          <img class="cart-item__img" src="${esc(item.image)}" alt="${esc(item.name)}" onerror="this.src=''" />
+          <div>
+            <p class="cart-item__name">${esc(item.name)}</p>
+            ${item.size ? `<p class="cart-item__size">Size: ${esc(item.size)}</p>` : ''}
+            <p class="cart-item__price">${fmt(item.price)} each</p>
+          </div>
+          <div class="cart-item__right">
+            <p class="cart-item__subtotal">${fmt(item.price * item.qty)}</p>
+            <div class="qty-control">
+              <button class="qty-btn" onclick="changeQty('${esc(item.key)}', ${item.qty - 1})">&#8722;</button>
+              <input class="qty-input" type="number" value="${item.qty}" min="1" max="20" onchange="changeQty('${esc(item.key)}', parseInt(this.value))" />
+              <button class="qty-btn" onclick="changeQty('${esc(item.key)}', ${item.qty + 1})">&#43;</button>
+            </div>
+            <button class="btn btn--danger btn--sm" onclick="removeItem('${esc(item.key)}')">Remove</button>
+          </div>
+        </div>`).join('');
+
+      layout.innerHTML = `
+        <div class="cart-items">
+          <div class="cart-items__header">Your Items (${cart.reduce((s,i)=>s+i.qty,0)})</div>
+          ${itemsHtml}
+        </div>
+        <div class="order-summary">
+          <h3>Order Summary</h3>
+          <div class="summary-line"><span>Subtotal</span><span>${fmt(subtotal)}</span></div>
+          <div class="summary-line"><span>Shipping</span><span>${shipping === 0 ? 'Free' : fmt(shipping)}</span></div>
+          ${shipping > 0 ? `<div class="summary-line" style="font-size:0.78rem;color:var(--green)"><span>Add ${fmt(50 - subtotal)} more for free shipping</span></div>` : ''}
+          <div class="summary-line summary-line--total"><span>Total</span><span>${fmt(total)}</span></div>
+
+          <div class="checkout-form">
+            <h4>Shipping Information</h4>
+            <form id="checkoutForm">
+              <div class="form-group"><label>Full Name</label><input type="text" placeholder="Your name" required /></div>
+              <div class="form-group"><label>Email</label><input type="email" placeholder="you@example.com" required /></div>
+              <div class="form-group"><label>Address</label><input type="text" placeholder="Street address" required /></div>
+              <div class="form-group"><label>City / State / ZIP</label><input type="text" placeholder="City, State ZIP" required /></div>
+              <button type="submit" class="btn btn--primary btn--full" style="margin-top:0.5rem">Place Order</button>
+            </form>
+            <div class="checkout-confirm hidden" id="checkoutConfirm">
+              &#10003; Order placed! Thank you for shopping with Multiple Mix. We'll email your confirmation shortly.
+            </div>
+          </div>
+        </div>`;
+
+      document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        this.classList.add('hidden');
+        document.getElementById('checkoutConfirm').classList.remove('hidden');
+        clearCart();
+      });
+    }
+
+    function changeQty(key, qty) {
+      if (qty < 1) { removeItem(key); return; }
+      updateQty(key, qty);
+      renderCart();
+    }
+
+    function removeItem(key) {
+      removeFromCart(key);
+      renderCart();
+    }
+
+    renderCart();
+  </script>
+</body>
+</html>
